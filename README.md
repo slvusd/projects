@@ -16,6 +16,10 @@ Then from pi's home directory, run
 You will be prompted for the username (slvusd-github) and password. Get the
 password (token) from Mr. Brown.
 
+You need to run `$HOME/src/git_sync.sh` once from the
+command line and enter the same credentials in order
+to have the credentials cached for cron.
+
 Finally, run `crontab -e` and add the following entry:
 
     */5 * * * * /home/pi/src/git_sync.sh
