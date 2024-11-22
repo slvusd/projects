@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+
+function pin19()
+{
+fetch('/pin19', { method: 'POST' });
+}
+
+function pin21()
+{
+fetch('/pin21', { method: 'POST' });
+}
+
+</script>
+</head>
+<body>
+
+<button onclick="pin19()">Open</button>
+<button onclick="pin21()">Close</button>
+
+</body>
+</html>
