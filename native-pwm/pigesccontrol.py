@@ -8,6 +8,7 @@ ESC_GPIO = 18
 MIN_PULSE = 1000  # Minimum throttle
 MAX_PULSE = 2000  # Maximum throttle
 HALF_SPEED_PULSE = (MIN_PULSE + MAX_PULSE) // 2  # 1500 µs for half speed
+FREQUENCY = 50
 
 # Initialize pigpio
 pi = pigpio.pi()
@@ -19,6 +20,7 @@ if not pi.connected:
 try:
     # Set GPIO mode to output
     pi.set_mode(ESC_GPIO, pigpio.OUTPUT)
+    pi.set_PWM_frequency(ESC_GPIO, FREQUENCY)
 
     # Initialize ESC with a neutral signal (e.g., 1500 µs for many ESCs)
     print("Initializing ESC. Please wait...")
