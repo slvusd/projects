@@ -35,7 +35,7 @@ try:
 
     # Run motor at half speed forward
     print("Running motor at half-speed forward...")
-    set_pulsewidth(0, HALF_FORWARD)
+    set_pulsewidth(0, FULL_FORWARD)
     time.sleep(5)
 
     # Stop the motor
