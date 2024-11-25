@@ -2,7 +2,7 @@ import pigpio
 import time
 
 # GPIO pin where the ESC is connected
-ESC_GPIO = 18
+ESC_GPIO = 19
 
 # Pulse width values in microseconds
 MIN_PULSE = 1000  # Minimum throttle
