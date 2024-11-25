@@ -39,7 +39,6 @@ if __name__ == "__main__":
         
         print("\nRunning motor at 1/2 speed forward...")
         esc.value = 0.5  # 1.75ms pulse (halfway between 1.5ms and 2ms)
-        esc.value = 0.0
         
         print("Press Ctrl+C to stop the motor.")
         signal.pause()
