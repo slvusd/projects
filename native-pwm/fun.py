@@ -18,6 +18,14 @@ def pulse_width_to_position(pulse_width_us):
     """
     return (pulse_width_us - 1500) / 500.0
 
-hat.move_servo_position(0, pulse_width_to_position(1750))
+hat.move_servo_position(0, 40)
 time.sleep(5)
+
+for i in range(1, 180):
+    print(i)
+    hat.move_servo_position(0, i)
+    time.sleep(.2)
+
+#hat.move_servo_position(0, pulse_width_to_position(1750))
+#time.sleep(5)
 
