@@ -10,3 +10,14 @@ hat.set_pwm_frequency(50)
 hat.set_duty_cycle(0, 82) # 20 ms
 hat.set_pulse_time(1, 2)
 
+# Map pulse width in microseconds to servo position (-1.0 to 1.0)
+def pulse_width_to_position(pulse_width_us):
+    """
+    Convert pulse width (in microseconds) to position for pi_servo_hat.
+    1000 µs maps to -1.0, 2000 µs maps to 1.0, and 1500 µs maps to 0.0.
+    """
+    return (pulse_width_us - 1500) / 500.0
+
+hat.move_servo_position(0, pulse_width_to_position(1750))
+time.sleep(5)
+
