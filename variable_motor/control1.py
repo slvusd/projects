@@ -29,11 +29,12 @@ print("{:>5}\t{:>5}".format('raw', 'v'))
 mid=1.608
 low_threshold=1.59
 high_threshold=1.62
+supply_voltage=3.2
 
 while True:
     # voltage goes from 0 to 4.1 with 2.5 being the middle
     if chan.voltage > high_threshold:
-        v = (chan.voltage - high_threshold) / (3.3-high_threshold)
+        v = (chan.voltage - high_threshold) / (supply_voltage-high_threshold)
         a = 90 + 50 * v
     elif chan.voltage < low_threshold:
         v = chan.voltage / low_threshold
