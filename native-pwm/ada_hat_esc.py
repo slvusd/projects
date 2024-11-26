@@ -1,6 +1,7 @@
 # Eric Brown 11/25/2024
 # Control sparkfun pHAT with adafruit PCA9685 library.
 # (This library maybe has more in it and is lower level than sparkfun library.)
+# This still doesn't work they way I'd like.
 
 import time
 from adafruit_pca9685 import PCA9685
