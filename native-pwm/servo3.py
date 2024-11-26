@@ -1,0 +1,22 @@
+from gpiozero import PWMOutputDevice
+import time
+
+pwm = PWMOutputDevice(18)
+
+try:
+    for _ in range(5):  # Repeat 5 times
+        # Ramp up
+        for value in [x/100 for x in range(0, 101, 10)]:
+            pwm.value = value
+            time.sleep(0.1)
+        
+        # Ramp down
+        for value in [x/100 for x in range(100, -1, -10)]:
+            pwm.value = value
+            time.sleep(0.1)
+
+except KeyboardInterrupt:
+    pass
+finally:
+    pwm.close()
+
