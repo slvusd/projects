@@ -1,5 +1,6 @@
 from time import sleep
 from adafruit_servokit import ServoKit
+import sys
 
 # Initialize PCA9685 with 16 channels
 kit = ServoKit(channels=16)
@@ -15,14 +16,16 @@ def set_throttle(pulse_width_ms):
     kit.servo[esc_channel].angle = angle
     print(f"pw: {pulse_width_ms} =angle:{angle}")
 
-kit.servo[0].angle=40
-sleep(1)
+angle=float(sys.argv[1])
+print(angle)
+kit.servo[0].angle=angle
+#sleep(1)
 # Example usage
-set_throttle(1.5)  # Stop (neutral position)
-sleep(1)
-set_throttle(1)    # Full reverse
-sleep(3)
-set_throttle(2)    # Full forward
-sleep(3)
-set_throttle(1.5)
+#set_throttle(1.5)  # Stop (neutral position)
+#sleep(1)
+#set_throttle(1)    # Full reverse
+#sleep(3)
+#set_throttle(2)    # Full forward
+#sleep(3)
+#set_throttle(1.5)
 
