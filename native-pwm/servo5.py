@@ -7,7 +7,7 @@ servo_pin = 18  # Change this to your actual GPIO pin
 
 # Create an AngularServo object
 servo = AngularServo(servo_pin, min_angle=0, max_angle=180,
-                     min_pulse_width=0.0005, max_pulse_width=0.0025)
+                     frequency=50, min_pulse_width=0.001, max_pulse_width=0.002)
 
 def main(angle):
     # Set the servo to the specified angle
