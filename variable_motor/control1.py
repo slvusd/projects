@@ -29,11 +29,11 @@ print("{:>5}\t{:>5}".format('raw', 'v'))
 while True:
     # voltage goes from 0 to 4.1 with 2.5 being the middle
     if chan.voltage > 2.6:
-        v = (2.6 - chan.voltage) / (4.1-2.6)
+        v = (chan.voltage - 2.6) / (4.1-2.6)
         a = 100 + 40 * v
     elif chan.voltage < 2.4:
         v = chan.voltage / 2.4
-        a = 80 - 40 * v
+        a = 40 + 40 * v
     else:
         a = 90
     
