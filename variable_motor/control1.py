@@ -37,6 +37,6 @@ while True:
     else:
         a = 90
     
-    kit.servo[0].angle = a
+    #kit.servo[0].angle = a
     print("{:>5}\t{:>5.3f}\t{:>5}".format(chan.value, chan.voltage, a))
     time.sleep(0.5)
