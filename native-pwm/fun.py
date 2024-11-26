@@ -23,8 +23,8 @@ def pulse_width_to_position(pulse_width_us):
     print(f"Pulse: {pulse_width_us}  Position: {position}")
     return position
 
-hat.move_servo_position(0, pulse_width_to_position(2000))
-time.sleep(5)
+#hat.move_servo_position(0, pulse_width_to_position(2000))
+#time.sleep(5)
 hat.move_servo_position(0, 40)
 time.sleep(5)
 
