@@ -13,7 +13,10 @@ def set_throttle(pulse_width_ms):
     # 1ms = 0 degrees, 2ms = 180 degrees
     angle = (pulse_width_ms - 1) * 180 / 1
     kit.servo[esc_channel].angle = angle
+    print(f"pw: {pulse_width_ms} =angle:{angle}")
 
+kit.servo[0].angle=40
+sleep(1)
 # Example usage
 set_throttle(1.5)  # Stop (neutral position)
 sleep(1)
