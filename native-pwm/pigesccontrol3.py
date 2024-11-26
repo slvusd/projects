@@ -3,7 +3,7 @@ import signal
 from time import sleep
 
 # Constants
-ESC_GPIO = 18  # GPIO pin for the ESC
+ESC_GPIO = 19  # GPIO pin for the ESC
 NEUTRAL_PULSE = 1500  # Neutral position (stop) in microseconds
 HALF_SPEED_PULSE = 1750  # Half-speed forward in microseconds
 FULL_REVERSE_PULSE = 1250  # Example: full reverse in microseconds (varies by ESC)

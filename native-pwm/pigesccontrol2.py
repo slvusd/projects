@@ -11,7 +11,7 @@ running = True
 
 # Create servo object with precise hardware timing
 esc = Servo(
-    18,                        # GPIO18 (Pin 12)
+    19,                        # GPIO18 (Pin 12)
     min_pulse_width=0.001,     # 1ms
     max_pulse_width=0.002,     # 2ms
     frame_width=0.020,         # 20ms (50Hz)
