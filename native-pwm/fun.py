@@ -1,3 +1,6 @@
+# Eric Brown
+# There is something wrong with the docs.
+# But playing with values here, maybe it can be figured out.
 import pi_servo_hat
 import time
 import sys
@@ -16,8 +19,12 @@ def pulse_width_to_position(pulse_width_us):
     Convert pulse width (in microseconds) to position for pi_servo_hat.
     1000 µs maps to -1.0, 2000 µs maps to 1.0, and 1500 µs maps to 0.0.
     """
-    return (pulse_width_us - 1500) / 500.0
+    position = (pulse_width_us - 1500) / 500.0 * 360 / (2*3.1415)
+    print(f"Pulse: {pulse_width_us}  Position: {position}")
+    return position
 
+hat.move_servo_position(0, pulse_width_to_position(2000))
+time.sleep(5)
 hat.move_servo_position(0, 40)
 time.sleep(5)
 
