@@ -1,5 +1,7 @@
 # ADS1115: i2c Analog to Digital
 
+Eric Brown 26 Nov 2024
+
 ## References
 
 * [Adafruit Software](https://github.com/adafruit/Adafruit_CircuitPython_ADS1x15)
