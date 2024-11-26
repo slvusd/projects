@@ -26,14 +26,18 @@ chan = AnalogIn(ads, ADS.P3)
 
 print("{:>5}\t{:>5}".format('raw', 'v'))
 
+mid=1.608
+low_threshold=1.58
+high_threshold=1.63
+
 while True:
     # voltage goes from 0 to 4.1 with 2.5 being the middle
-    if chan.voltage > 1.7:
-        v = (chan.voltage - 1.7) / (3.3-1.7)
-        a = 100 + 40 * v
-    elif chan.voltage < 1.5:
-        v = chan.voltage / 1.5
-        a = 40 + 40 * v
+    if chan.voltage > high_threshold:
+        v = (chan.voltage - high_threshold) / (3.3-high_threshold)
+        a = 90 + 50 * v
+    elif chan.voltage < low_threshold:
+        v = chan.voltage / low_threshold
+        a = 40 + 50 * v
     else:
         a = 90
     
