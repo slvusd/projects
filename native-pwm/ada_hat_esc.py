@@ -1,3 +1,7 @@
+# Eric Brown 11/25/2024
+# Control sparkfun pHAT with adafruit PCA9685 library.
+# (This library maybe has more in it and is lower level than sparkfun library.)
+
 import time
 from adafruit_pca9685 import PCA9685
 from board import SCL, SDA
@@ -36,6 +40,10 @@ try:
     # Run motor at half speed forward
     print("Running motor at half-speed forward...")
     set_pulsewidth(0, FULL_FORWARD)
+    time.sleep(5)
+
+    print("Running motoer at half-speed backward...")
+    set_pulsewidth(0, FULL_REVERSE)
     time.sleep(5)
 
     # Stop the motor
