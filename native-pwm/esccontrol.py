@@ -5,7 +5,7 @@ from time import sleep
 
 # Create servo object with explicit pulse widths
 esc = Servo(
-    18,                        # GPIO18 (Pin 12)
+    19,                        # GPIO19
     min_pulse_width=0.001,     # 1ms for full reverse
     max_pulse_width=0.002,     # 2ms for full forward
     frame_width=0.020          # 20ms frame (50Hz)
