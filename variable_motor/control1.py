@@ -27,8 +27,8 @@ chan = AnalogIn(ads, ADS.P3)
 print("{:>5}\t{:>5}".format('raw', 'v'))
 
 mid=1.608
-low_threshold=1.58
-high_threshold=1.63
+low_threshold=1.59
+high_threshold=1.62
 
 while True:
     # voltage goes from 0 to 4.1 with 2.5 being the middle
@@ -41,6 +41,6 @@ while True:
     else:
         a = 90
     
-    #kit.servo[0].angle = a
+    kit.servo[0].angle = a
     print("{:>5}\t{:>5.3f}\t{:>5}".format(chan.value, chan.voltage, a))
     time.sleep(0.5)
