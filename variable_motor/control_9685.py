@@ -1,3 +1,5 @@
+# TODO: Fix this code to use adafruit_pca9685 instead of ServoKit.
+
 import time
 import board
 import busio

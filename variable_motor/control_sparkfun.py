@@ -1,3 +1,12 @@
+# Eric Brown 26 Nov 2024
+# This program worked with the sparkfun PWM (Servo) hat. It is still a
+# tad bit finicky as it works between angles of 40 and 140 which is rather
+# bizare and due to some poor defaults in ServoKit. Perhaps using the 9685
+# library directly will yield better results.
+
+# The sparkfun hat is fine, but a straight 9685 connected via i2c is
+# potentially more flexible and is cheaper.
+
 import time
 import board
 import busio

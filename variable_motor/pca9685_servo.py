@@ -1,4 +1,16 @@
-# https://github.com/adafruit/Adafruit_CircuitPython_PCA9685/blob/main/examples/pca9685_servo.py
+# Eric Brown 26 Nov 2024
+# Modified from: https://github.com/adafruit/Adafruit_CircuitPython_PCA9685/blob/main/examples/pca9685_servo.py
+
+# THIS IS GOLD!
+# When connected to our cheap ESC (motor controller), this seems to 
+# provide a full range of motion from an angle of 0 (full reverse)
+# to 90 (stop) to 180 (full forward). (Forward and reverse designations
+# being arbitrary.)
+#
+# Only the first loop is important, but given how well this seemed to
+# work in tests, it may be best to leave it as a reference and make
+# other utility programs, etc.
+
 
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
