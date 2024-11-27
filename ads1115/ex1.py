@@ -11,7 +11,7 @@ i2c = busio.I2C(board.SCL, board.SDA)
 ads = ADS.ADS1015(i2c, gain=1)
 
 # Create single-ended input on channel 0
-chan = AnalogIn(ads, ADS.P3)
+chan = AnalogIn(ads, ADS.P0)
 
 # Create differential input between channel 0 and 1
 #chan = AnalogIn(ads, ADS.P0, ADS.P1)
