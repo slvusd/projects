@@ -38,7 +38,9 @@ servo0 = servo.Servo(pca.channels[0], min_pulse=1000, max_pulse=2000)
 # The pulse range is 750 - 2250 by default. This range typically gives 135 degrees of
 # range, but the default is to use 180 degrees. You can specify the expected range if you wish:
 # servo7 = servo.Servo(pca.channels[7], actuation_range=135)
-servo7 = servo.Servo(pca.channels[7])
+#servo7 = servo.Servo(pca.channels[7])
+servo0.angle = 90
+time.sleep(1)
 
 # We sleep in the loops to give the servo time to move into position.
 for i in range(180):
