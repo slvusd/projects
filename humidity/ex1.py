@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Eric Brown 27 Nov 2024
 # From: https://github.com/adafruit/Adafruit_CircuitPython_AHTx0
 
@@ -22,5 +23,5 @@ def c2f(c):
     return (c * 9/5) + 32
 
 while True:
-    print(f"Temp: {c2f(sensor.temperature):.1f}°F  Humidity: {sensor.relative_humidity:.1f}%")
+    print(f"Temperature: {sensor.temperature:.1f}°C/{c2f(sensor.temperature):.1f}°F Humidity: {sensor.relative_humidity:.1f}%")
     time.sleep(2)
