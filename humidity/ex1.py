@@ -1,3 +1,6 @@
+# Eric Brown 27 Nov 2024
+# From: https://github.com/adafruit/Adafruit_CircuitPython_AHTx0
+
 import time
 import board
 import adafruit_ahtx0
@@ -6,7 +9,18 @@ import adafruit_ahtx0
 i2c = board.I2C()  # uses board.SCL and board.SDA
 sensor = adafruit_ahtx0.AHTx0(i2c)
 
+def c2f(c):
+    """
+    Convert Celsius to Fahrenheit.
+    
+    Args:
+    celsius (float): Temperature in Celsius
+    
+    Returns:
+    float: Temperature in Fahrenheit
+    """
+    return (c * 9/5) + 32
+
 while True:
-    print("\nTemperature: %0.1f C" % sensor.temperature)
-    print("Humidity: %0.1f %%" % sensor.relative_humidity)
+    print(f"Temp: {c2f(sensor.temperature):.1f}°F  Humidity: {sensor.relative_humidity:.1f}%")
     time.sleep(2)
