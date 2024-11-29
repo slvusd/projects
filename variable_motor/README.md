@@ -8,6 +8,44 @@ These are the primary modules in use. `pip list` might show more.
 * adafruit-circuitpython-servokit
 * adafruit-circuitpython-pca9685
 
+## Circuit Diagram
+
+```mermaid
+graph TD
+    A[12V DC Power Supply] -->|12V| B[Switch]
+    B -->|12V| C[DC-DC Converter]
+    C --> |5V| E[Raspberry Pi]
+    
+    B -->|12V| F[Power Supply 700mA]
+    F --> |3.3V| G[Breadboard]
+    
+    G -->|Ground| P[PWM Controller]
+    G -->|VCC| P
+    G -->|Data| P
+    G -->|Clock| P
+    
+    P <--> |5V PWM| H[ESC 1]
+    P <--> |5V PWM| J[ESC 2]
+    
+    B -->|12V| H
+    B -->|12V| J
+    
+    E -->|Ground| G
+    E -->|Data| G
+    E -->|Clock| G
+    
+    M[Joystick 1] <--> N[ADC]
+    O[Joystick 2] <--> N
+    N -->|Ground| G
+    N -->|VCC| G
+    N -->|Data| G
+    N -->|Clock| G
+    
+    H --> |6-12V| I[Motor 1]
+    H --> |6-12V| K[Motor 2]
+    J --> |6-12V| L[Motor 3]
+```
+
 ## Notes
 
 ### 2024-11-26 Eric Brown
