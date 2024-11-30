@@ -2,7 +2,12 @@ from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 
 # Set up credentials (you'll need to handle authentication)
-creds = Credentials.from_authorized_user_file('/home/pi/cred.json', ['https://www.googleapis.com/auth/spreadsheets'])
+#creds = Credentials.from_authorized_user_file('/home/pi/cred.json', ['https://www.googleapis.com/auth/spreadsheets'])
+creds = Credentials.from_service_account_file(
+    '/home/pi/cred.json',
+    scopes=['https://www.googleapis.com/auth/spreadsheets']
+)
+
 
 # Create the Sheets API service
 service = build('sheets', 'v4', credentials=creds)
