@@ -48,6 +48,9 @@ def c2f(c):
     return (c * 9/5) + 32
 
 while True:
+    now = datetime.now()
+    date = now.strftime("%Y-%m-%d")
+    tim = now.strftime("%H:%M:%S")
     t = f'=DATEVALUE("{date}") + TIMEVALUE("{tim}")'
     c = sensor.temperature
     f = c2f(sensor.temperature)
@@ -68,4 +71,4 @@ while True:
 
     print(f"Temperature: {sensor.temperature:.1f}°C/{c2f(sensor.temperature):.1f}°F Humidity: {sensor.relative_humidity:.1f}%")
     print(values)
-    time.sleep(10)
+    time.sleep(120)
