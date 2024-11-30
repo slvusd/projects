@@ -1,5 +1,5 @@
 from googleapiclient.discovery import build
-from google.oauth2.credentials import Credentials
+from google.oauth2.service_account import Credentials
 
 # Set up credentials (you'll need to handle authentication)
 #creds = Credentials.from_authorized_user_file('/home/pi/cred.json', ['https://www.googleapis.com/auth/spreadsheets'])
