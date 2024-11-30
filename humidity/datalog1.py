@@ -53,7 +53,7 @@ while True:
     tim = now.strftime("%H:%M:%S")
     t = f'=DATEVALUE("{date}") + TIMEVALUE("{tim}")'
     c = sensor.temperature
-    f = c2f(sensor.temperature)
+    f = c2f(c)
     h = sensor.relative_humidity
 
     values = [
@@ -69,6 +69,6 @@ while True:
         body=body
     ).execute()
 
-    print(f"Temperature: {sensor.temperature:.1f}°C/{c2f(sensor.temperature):.1f}°F Humidity: {sensor.relative_humidity:.1f}%")
-    print(values)
+    #print(f"Temperature: {sensor.temperature:.1f}°C/{c2f(sensor.temperature):.1f}°F Humidity: {sensor.relative_humidity:.1f}%")
+    #print(values)
     time.sleep(120)
