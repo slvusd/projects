@@ -30,6 +30,7 @@ i2c = board.I2C()  # uses board.SCL and board.SDA
 sensor = adafruit_ahtx0.AHTx0(i2c)
 
 # Current timestamp formatted as string
+now = datetime.now()
 current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 def c2f(c):
@@ -45,7 +46,7 @@ def c2f(c):
     return (c * 9/5) + 32
 
 while True:
-    t = f'=DATEVALUE("{current_time}")'
+    t = f'=DATEVALUE("{now.strftime(\"%Y-%m-%d\")}")'
     c = sensor.temperature
     f = c2f(sensor.temperature)
     h = sensor.relative_humidity
