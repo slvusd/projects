@@ -71,4 +71,4 @@ while True:
 
     #print(f"Temperature: {sensor.temperature:.1f}°C/{c2f(sensor.temperature):.1f}°F Humidity: {sensor.relative_humidity:.1f}%")
     #print(values)
-    time.sleep(120)
+    time.sleep(600)
