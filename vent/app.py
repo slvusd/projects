@@ -9,20 +9,20 @@ app = Flask(__name__)
 def home():
 	return render_template('index.html')
 
-@app.route('/pin19', methods=['POST'])
-def pin19():
-	pin19 = LED(19)
-	pin19.on()
+@app.route('/pin17', methods=['POST'])
+def pin17():
+	pin17 = LED(17)
+	pin17.on()
 	sleep(5)
-	print("pin19 trigger")
+	print("pin17 (on) trigger")
 	return "flask is terrible"
 
-@app.route('/pin21', methods=['POST'])
-def pin21():
-        pin21 = LED(21)
-        pin21.off()
+@app.route('/pin27', methods=['POST'])
+def pin27():
+        pin27 = LED(27)
+        pin27.on()
         sleep(5)
-        print("pin21 trigger")
+        print("pin27 (off) trigger")
         return "flask is terrible"
 
 if __name__ == '__main__':
