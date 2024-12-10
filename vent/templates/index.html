@@ -4,10 +4,11 @@
 </head>
 <body>
 
+
 <button onclick="pin17()">Open</button>
 <button onclick="pin27()">Close</button>
 <p>Temperature: <span>
-</span id="temp">0</p>
+</span id="temp">999</p>
 
 
 <script>
@@ -27,7 +28,7 @@ function temp()
 fetch('/temp', { method: 'POST' });
 }
 
-document.getElementById
+document.getElementById('temp').textContent = temp()
 
 </script>
 </body>
