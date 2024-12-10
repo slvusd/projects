@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+</head>
+<body>
+
+<button onclick="pin17()">Open</button>
+<button onclick="pin27()">Close</button>
+<p>Temperature: <span>
+</span id="temp">0</p>
+
+
 <script>
 
 function pin17()
@@ -13,12 +22,13 @@ function pin27()
 fetch('/pin27', { method: 'POST' });
 }
 
+function temp()     
+{
+fetch('/temp', { method: 'POST' });
+}
+
+document.getElementById
+
 </script>
-</head>
-<body>
-
-<button onclick="pin17()">Open</button>
-<button onclick="pin27()">Close</button>
-
 </body>
 </html>
