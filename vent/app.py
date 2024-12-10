@@ -1,6 +1,8 @@
 from flask import Flask, render_template
 from gpiozero import LED
 from time import sleep
+from board import I2C
+from adafruit_ahtx0 import AHTx0
 
 app = Flask(__name__)
 
