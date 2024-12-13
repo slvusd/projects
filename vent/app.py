@@ -27,5 +27,7 @@ def pin27():
         print("pin27 (off) trigger")
         return "flask is terrible"
 
+@app.route('')
+
 if __name__ == '__main__':
 	app.run(host='0.0.0.0')
