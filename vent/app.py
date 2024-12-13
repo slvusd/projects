@@ -6,6 +6,10 @@ from adafruit_ahtx0 import AHTx0
 
 app = Flask(__name__)
 
+#sets up thermometer
+i2c = I2C()
+thermometer = AHTx0(i2c)
+sleep(2)
 
 @app.route('/')
 def home():
@@ -27,7 +31,9 @@ def pin27():
         print("pin27 (off) trigger")
         return "flask is terrible"
 
-@app.route('')
+@app.route('/temp', methods=['POST'])
+def temp():
+	return thermometer.temperature
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0')
