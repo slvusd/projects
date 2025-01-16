@@ -1,34 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-</head>
+<html>
 <body>
 
 
-<button onclick="pin17()">Open</button>
-<button onclick="pin27()">Close</button>
-<p>Temperature: <span>
-</span id="temp">999</p>
+<button onclick="open()">Open</button>
+<button onclick="close()">Close</button>
+<p>Temperature: {{ temper }} C</p>
 
 
 <script>
 
-function pin17()
+function open()
 {
 fetch('/pin17', { method: 'POST' });
 }
 
-function pin27()
+function close()
 {
 fetch('/pin27', { method: 'POST' });
 }
-
-function temp()     
-{
-fetch('/temp', { method: 'POST' });
-}
-
-document.getElementById('temp').textContent = temp()
 
 </script>
 </body>
