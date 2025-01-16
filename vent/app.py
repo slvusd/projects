@@ -9,7 +9,6 @@ app = Flask(__name__)
 #sets up thermometer
 i2c = I2C()
 thermometer = AHTx0(i2c)
-sleep(2)
 
 @app.route('/')
 def home():
@@ -20,7 +19,7 @@ def pin17():
 	pin17 = LED(17)
 	pin17.on()
 	sleep(5)
-	print("pin17 (on) trigger")
+	print("pin17 (open) trigger")
 	return "flask is terrible"
 
 @app.route('/pin27', methods=['POST'])
@@ -28,7 +27,7 @@ def pin27():
         pin27 = LED(27)
         pin27.on()
         sleep(5)
-        print("pin27 (off) trigger")
+        print("pin27 (close) trigger")
         return "flask is terrible"
 
 @app.route('/temp', methods=['POST'])
