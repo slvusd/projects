@@ -9,10 +9,11 @@ app = Flask(__name__)
 #sets up thermometer
 i2c = I2C()
 thermometer = AHTx0(i2c)
+temp = thermometer.temperature
 
 @app.route('/')
-def home():
-	return render_template('index.html')
+def index():
+	return render_template('index.html', temp=temp)
 
 @app.route('/pin17', methods=['POST'])
 def pin17():
@@ -29,10 +30,6 @@ def pin27():
         sleep(5)
         print("pin27 (close) trigger")
         return "flask is terrible"
-
-@app.route('/temp', methods=['POST'])
-def temp():
-	return thermometer.temperature
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0')
