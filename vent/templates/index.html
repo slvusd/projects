@@ -5,7 +5,7 @@
 
 <button onclick="open()">Open</button>
 <button onclick="close()">Close</button>
-<p>Temperature: <span id="temper"></span> C</p>
+<p><span id="temperC"></span> C <br><span id="temperF"></span> F</p>
 
 
 <script>
@@ -25,9 +25,9 @@ function updateTemper()
 fetch('/temper')
 .then (response => response.json())
 .then (data => {
-document.getElementById('temper').innerText = data.temper.toFixed(2);
-})
-}
+document.getElementById('temperC').innerText = data.temper.toFixed(2);
+document.getElementById('temperF').innerText = ((data.temper * 1.8) + 32).toFixed(2);
+})}
 
 setInterval(updateTemper, 1000);
 updateTemper();
