@@ -10,9 +10,11 @@
 
 <script>
 
-function open()
+function open(event)
 {
-fetch('/pin17', { method: 'POST' }).catch(error => console.error('Error:', error));
+//debugging
+event.preventDefault();
+fetch('/pin17', { method: 'POST' });
 }
 
 function close()

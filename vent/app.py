@@ -13,6 +13,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
+	print("rendering") #debugging
 	return render_template('index.html')
 
 @app.route('/pin17', methods=['POST'])
