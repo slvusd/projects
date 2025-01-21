@@ -17,6 +17,7 @@ def index():
 
 @app.route('/pin17', methods=['POST'])
 def pin17():
+	print("request for open") #debugging
 	pin17 = LED(17)
 	pin17.on()
 	sleep(5)

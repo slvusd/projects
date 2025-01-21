@@ -12,7 +12,7 @@
 
 function open()
 {
-fetch('/pin17', { method: 'POST' });
+fetch('/pin17', { method: 'POST' }).catch(error => console.error('Error:', error));
 }
 
 function close()
