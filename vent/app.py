@@ -21,7 +21,7 @@ def pin17():
 	pin17.on()
 	sleep(5)
 	print("pin17 (open) trigger")
-	return "flask is terrible"
+	return '', 200
 
 @app.route('/pin27', methods=['POST'])
 def pin27():
@@ -29,7 +29,7 @@ def pin27():
         pin27.on()
         sleep(5)
         print("pin27 (close) trigger")
-        return "flask is terrible"
+        return '', 200
 
 #@app.route('/temper', methods=['GET'])
 #def temper():
