@@ -9,6 +9,7 @@ app = Flask(__name__)
 #sets up thermometer
 i2c = I2C()
 thermometer = AHTx0(i2c)
+sleep(2)
 temp = thermometer.temperature
 
 @app.route('/')
