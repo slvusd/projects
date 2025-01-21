@@ -7,9 +7,9 @@ from adafruit_ahtx0 import AHTx0
 app = Flask(__name__)
 
 #sets up thermometer
-i2c = I2C()
-thermometer = AHTx0(i2c)
-temper = thermometer.temperature
+#i2c = I2C()
+#thermometer = AHTx0(i2c)
+#temper = thermometer.temperature
 
 @app.route('/')
 def index():
@@ -31,10 +31,10 @@ def pin27():
         print("pin27 (close) trigger")
         return "flask is terrible"
 
-@app.route('/temper', methods=['GET'])
-def temper():
-	temper = thermometer.temperature
-	return {"temper": temper}
+#@app.route('/temper', methods=['GET'])
+#def temper():
+	#temper = thermometer.temperature
+	#return {"temper": temper}
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0')
