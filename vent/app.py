@@ -9,12 +9,11 @@ app = Flask(__name__)
 #sets up thermometer
 i2c = I2C()
 thermometer = AHTx0(i2c)
-sleep(2)
-temp = thermometer.temperature
+temper = thermometer.temperature
 
 @app.route('/')
 def index():
-	return render_template('index.html', temp=temp)
+	return render_template('index.html', temper=temper)
 
 @app.route('/pin17', methods=['POST'])
 def pin17():
