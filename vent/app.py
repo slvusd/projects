@@ -13,7 +13,7 @@ temper = thermometer.temperature
 
 @app.route('/')
 def index():
-	return render_template('index.html', temper=temper)
+	return render_template('index.html')
 
 @app.route('/pin17', methods=['POST'])
 def pin17():
@@ -30,6 +30,11 @@ def pin27():
         sleep(5)
         print("pin27 (close) trigger")
         return "flask is terrible"
+
+@app.route('/temper', methods=['GET'])
+def temper():
+	temper = thermometer.temperature
+	return {"temper": temper}
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0')
