@@ -3,20 +3,19 @@
 <body>
 
 
-<button onclick="open()">Open</button>
+<button id="open">Open</button>
 <button onclick="close()">Close</button>
 <p><span id="temperC"></span> C <br><span id="temperF"></span> F</p>
 
 
 <script>
 
-function open(event)
+document.getElementById("open").addEventListener("click", function(event)
 {
-//debugging
 event.preventDefault();
 alert("open clicked");
-fetch('/pin17', { method: 'POST' });
-}
+fetch('/pin17', { method: 'POST' }).catch(error => console.error('error: ', error));
+})
 
 function close()
 {
