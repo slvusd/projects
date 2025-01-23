@@ -19,17 +19,17 @@ def index():
 def pin17():
 	pin17 = LED(17)
 	pin17.on()
-	sleep(5)
 	print("pin17 (open) trigger")
+        sleep(5)
 	return '', 200
 
 @app.route('/pin27', methods=['POST'])
 def pin27():
         pin27 = LED(27)
         pin27.on()
-        sleep(5)
         print("pin27 (close) trigger")
-        return '', 200
+        sleep(5)
+	return '', 200
 
 @app.route('/temper', methods=['GET'])
 def temper():
