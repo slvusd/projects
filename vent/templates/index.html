@@ -3,8 +3,8 @@
 <body>
 
 
-<button id="open">Open</button>
-<button id="close">Close</button>
+<button class="button" id="open">Open</button>
+<button class="button" id="close">Close</button>
 <p><span id="temperC"></span> C <br><span id="temperF"></span> F</p>
 
 
@@ -13,20 +13,26 @@
 document.getElementById("open").addEventListener("click", function(event)
 {
 event.preventDefault();
-fetch('/pin17', { method: 'POST' }).catch(error => console.error('error: ', error));
+fetch('/pin17', { method: 'POST' });
+.finally(() => {
+setTimeout(() => {
+document.getElementByClassName("button").style.display = "block";
+}, 5000);
+})
 })
 
 document.getElementById("close").addEventListener("click", function(event)
 {
 event.preventDefault();
-fetch('/pin27', { method: 'POST' }).catch(error => console.error('error: ', error));
+fetch('/pin27', { method: 'POST' });
 })
 
 function updateTemper()
 {
 fetch('/temper')
 .then (response => response.json())
-.then (data => {
+.then (data =>
+{
 document.getElementById('temperC').innerText = data.temper.toFixed(2);
 document.getElementById('temperF').innerText = ((data.temper * 1.8) + 32).toFixed(2);
 })}
