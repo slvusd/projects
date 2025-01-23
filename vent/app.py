@@ -7,18 +7,16 @@ from adafruit_ahtx0 import AHTx0
 app = Flask(__name__)
 
 #sets up thermometer
-#i2c = I2C()
-#thermometer = AHTx0(i2c)
-#temper = thermometer.temperature
+i2c = I2C()
+thermometer = AHTx0(i2c)
+temper = thermometer.temperature
 
 @app.route('/')
 def index():
-	print("rendering") #debugging
 	return render_template('index.html')
 
 @app.route('/pin17', methods=['POST'])
 def pin17():
-	print("request for open") #debugging
 	pin17 = LED(17)
 	pin17.on()
 	sleep(5)
@@ -33,10 +31,10 @@ def pin27():
         print("pin27 (close) trigger")
         return '', 200
 
-#@app.route('/temper', methods=['GET'])
-#def temper():
-	#temper = thermometer.temperature
-	#return {"temper": temper}
+@app.route('/temper', methods=['GET'])
+def temper():
+	temper = thermometer.temperature
+	return {"temper": temper}
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0')
