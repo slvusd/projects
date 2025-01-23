@@ -14,11 +14,6 @@ document.getElementById("open").addEventListener("click", function(event)
 {
 event.preventDefault();
 fetch('/pin17', { method: 'POST' });
-.finally(() => {
-setTimeout(() => {
-document.getElementByClassName("button").style.display = "block";
-}, 5000);
-})
 })
 
 document.getElementById("close").addEventListener("click", function(event)
