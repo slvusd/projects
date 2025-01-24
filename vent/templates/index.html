@@ -23,14 +23,21 @@ fetch("/pin17", { method: "POST" })
 .finally(() => {
 buttons.forEach(button => button.style.display = "block");
 });
-
 });
 
 document.getElementById("close").addEventListener("click", function(event)
 {
 event.preventDefault();
-fetch("/pin27", { method: "POST" });
-})
+
+const buttons = document.querySelectorAll(".button");
+buttons.forEach(button => button.style.display = "none");
+
+fetch("/pin27", { method: "POST" })
+
+.finally(() => {
+buttons.forEach(button => button.style.display = "block");
+});
+});
 
 function updateTemper()
 {
