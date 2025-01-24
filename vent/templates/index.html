@@ -2,9 +2,10 @@
 <html>
 <body>
 
-
-<button class="button" id="open">Open</button>
-<button class="button" id="close">Close</button>
+<div class="button">
+<button id="open">Open</button>
+<button id="close">Close</button>
+</div>
 <p><span id="temperC"></span> C <br><span id="temperF"></span> F</p>
 
 
@@ -17,7 +18,7 @@ event.preventDefault();
 const buttons = document.querySelectorAll(".button");
 buttons.forEach(button => button.style.display = "none");
 
-fetch('/pin17', { method: 'POST' })
+fetch("/pin17", { method: "POST" })
 
 .finally(() => {
 buttons.forEach(button => button.style.display = "block");
@@ -28,17 +29,17 @@ buttons.forEach(button => button.style.display = "block");
 document.getElementById("close").addEventListener("click", function(event)
 {
 event.preventDefault();
-fetch('/pin27', { method: 'POST' });
+fetch("/pin27", { method: "POST" });
 })
 
 function updateTemper()
 {
-fetch('/temper')
+fetch("/temper")
 .then (response => response.json())
 .then (data =>
 {
-document.getElementById('temperC').innerText = data.temper.toFixed(2);
-document.getElementById('temperF').innerText = ((data.temper * 1.8) + 32).toFixed(2);
+document.getElementById("temperC").innerText = data.temper.toFixed(2);
+document.getElementById("temperF").innerText = ((data.temper * 1.8) + 32).toFixed(2);
 })}
 
 setInterval(updateTemper, 1000);
