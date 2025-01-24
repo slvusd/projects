@@ -5,7 +5,7 @@
 
 <button class="button" id="open">Open</button>
 <button class="button" id="close">Close</button>
-<p><span id="temperC"></span> C <br><span id="temperF"></span> F</p>
+<p><span id="temperC"></span> C <hr><span id="temperF"></span> F</p>
 
 
 <script>
@@ -16,14 +16,14 @@ document.getElementById("open").addEventListener("click", function(event)
 event.preventDefault();
 
 setTimeout(() => {
-buttons.forEach(button => button.style.display = "block");
+buttons.forEach(button => button.style.display = "none");
 }, 5000);
 
 fetch('/pin17', { method: 'POST' })
 
 .finally(() => {
 const buttons = document.querySelectorAll(".button");
-buttons.forEach(button => button.style.display = "none");
+buttons.forEach(button => button.style.display = "block");
 
 });
 
