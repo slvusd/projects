@@ -12,8 +12,19 @@
 
 document.getElementById("open").addEventListener("click", function(event)
 {
+
 event.preventDefault();
 fetch('/pin17', { method: 'POST' });
+
+.finally(() => {
+const buttons = document.querySelectorAll(".button");
+buttons.forEach(button => button.style.display = "none");
+
+setTimeout(() => {
+buttons.forEach(button => button.style.display = "block");
+}, 5000);
+});
+
 })
 
 document.getElementById("close").addEventListener("click", function(event)
