@@ -19,11 +19,8 @@ buttons.forEach(button => button.style.display = "none");
 
 fetch('/pin17', { method: 'POST' })
 
-.then(() => {
-setTimeout(() => {
+.finally(() => {
 buttons.forEach(button => button.style.display = "block");
-}, 5000);
-
 });
 
 });
