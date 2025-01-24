@@ -3,9 +3,9 @@
 <body>
 
 
-<button class="button" id="open">Open</button>
+<button class="button" id="open">Open</button><br>
 <button class="button" id="close">Close</button>
-<p><span id="temperC"></span> C <hr><span id="temperF"></span> F</p>
+<p><span id="temperC"></span> C <br><span id="temperF"></span> F</p>
 
 
 <script>
@@ -21,7 +21,7 @@ buttons.forEach(button => button.style.display = "none");
 
 fetch('/pin17', { method: 'POST' })
 
-.finally(() => {
+.then(() => {
 const buttons = document.querySelectorAll(".button");
 buttons.forEach(button => button.style.display = "block");
 
