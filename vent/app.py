@@ -14,7 +14,7 @@ temper = thermometer.temperature
 
 def control(command):
 	mutex = Lock()
-	mutex.aquire()
+	mutex.acquire()
 
 	pin17 = LED(17)
 	pin27 = LED(27)
