@@ -16,7 +16,7 @@ document.getElementById("open").addEventListener("click", function(event)
 event.preventDefault();
 
 const buttons = document.querySelectorAll(".button");
-buttons.forEach(button => button.style.display = "none");
+//buttons.forEach(button => button.style.display = "none");
 
 fetch("/pin17", { method: "POST" })
 
@@ -30,7 +30,7 @@ document.getElementById("close").addEventListener("click", function(event)
 event.preventDefault();
 
 const buttons = document.querySelectorAll(".button");
-buttons.forEach(button => button.style.display = "none");
+//buttons.forEach(button => button.style.display = "none");
 
 fetch("/pin27", { method: "POST" })
 
