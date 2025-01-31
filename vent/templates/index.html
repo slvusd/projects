@@ -6,24 +6,25 @@
 <button id="open">Open</button>
 <button id="close">Close</button>
 </div>
-<p><span id="temperC"></span> C<br><span id="temperF"></span> F</p>
+<p><span id="temperC"></span>°C<br><span id="temperF"></span>°F</p>
 
 <div>
-<label><input type="checkbox" id="tempControlCheckbox" />
+<label><input type="checkbox" id="tempCheckbox" />
 Automatic Temperature Control</label>
 </div>
 
-<div class="slider">
-<label for="desiredTemp">Desired Temperature:</label>
-<input id="desiredTemp" type="range" min="0" max="50" step="0.1" value="25" />
-<span id="desiredTempC"> C</span> / <span id="desiredTempF"> F</span>
+<div class="input-box">
+<label for="desiredTempC">Desired Temperature (°C):</label>
+<input id="desiredTempC" type="number" step="0.1" value="25" />
+
+<label for="desiredTempF">Desired Temperature (°F):</label>
+<input id="desiredTempF" type="number" step="0.1" value="77" />
 </div>
 
 
 <script>
 
-document.getElementById("open").addEventListener("click", function(event)
-{
+document.getElementById("open").addEventListener("click", function(event) {
 event.preventDefault();
 
 const buttons = document.querySelectorAll(".button");
@@ -36,8 +37,7 @@ buttons.forEach(button => button.style.display = "block");
 });
 });
 
-document.getElementById("close").addEventListener("click", function(event)
-{
+document.getElementById("close").addEventListener("click", function(event) {
 event.preventDefault();
 
 const buttons = document.querySelectorAll(".button");
@@ -50,15 +50,46 @@ buttons.forEach(button => button.style.display = "block");
 });
 });
 
-function updateTemper()
-{
+
+const desiredTempC = document.getElementById("desiredTempC");
+const desiredTempF = document.getElementById("desiredTempF");
+const tempCheckbox = document.getElementById("tempCheckbox");
+
+let lastCommand = 0;
+
+// shows both F and C inputs when one is inputted
+desiredTempC.addEventListener("input", function() {
+  const celsius = parseFloat(desiredTempCInput.value) || 0;
+  const fahrenheit = (celsius * 1.8 + 32).toFixed(1);
+  desiredTempF.value = fahrenheit;
+});
+
+desiredTempF.addEventListener("input", function() {
+  const fahrenheit = parseFloat(desiredTempF.value) || 0;
+  const celsius = ((fahrenheit - 32) / 1.8).toFixed(1);
+  desiredTempCInput.value = celsius;
+});
+
+
+function updateTemper() {
 fetch("/temper")
 .then (response => response.json())
-.then (data =>
-{
+.then (data => {
 document.getElementById("temperC").innerText = data.temper.toFixed(2);
 document.getElementById("temperF").innerText = ((data.temper * 1.8) + 32).toFixed(2);
-})}
+
+const desiredTempCValue = parseFloat(desiredTempC.value) || 0;
+
+if (tempCheckbox.checked) {
+if (currentTemp < desiredTempCValue && lastCommand !== "open") {
+fetch("/pin17", { method: "POST" });
+lastCommand = "open";
+console.log("opened due to temperature");
+} else if (currentTemp > desiredTempCValue && lastCommand !== "close") {
+fetch("/pin27", { method: "POST" });
+lastCommand = "close";
+console.log("closed due to temperature");
+}}});}
 
 setInterval(updateTemper, 1000);
 updateTemper();
