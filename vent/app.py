@@ -12,8 +12,9 @@ i2c = I2C()
 thermometer = AHTx0(i2c)
 temper = thermometer.temperature
 
+mutex = Lock()
+
 def control(command):
-	mutex = Lock()
 	mutex.acquire()
 
 	pin17 = LED(17)
