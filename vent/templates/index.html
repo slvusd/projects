@@ -59,7 +59,7 @@ let lastCommand = 0;
 
 // shows both F and C inputs when one is inputted
 desiredTempC.addEventListener("input", function() {
-  const celsius = parseFloat(desiredTempCInput.value) || 0;
+  const celsius = parseFloat(desiredTempC.value) || 0;
   const fahrenheit = (celsius * 1.8 + 32).toFixed(1);
   desiredTempF.value = fahrenheit;
 });
@@ -75,8 +75,9 @@ function updateTemper() {
 fetch("/temper")
 .then (response => response.json())
 .then (data => {
-document.getElementById("temperC").innerText = data.temper.toFixed(2);
-document.getElementById("temperF").innerText = ((data.temper * 1.8) + 32).toFixed(2);
+const currentTemp = data.temper;
+document.getElementById("temperC").innerText = currentTemp.toFixed(2);
+document.getElementById("temperF").innerText = ((currentTemp * 1.8) + 32).toFixed(2);
 
 const desiredTempCValue = parseFloat(desiredTempC.value) || 0;
 
