@@ -65,7 +65,7 @@ desiredTempC.addEventListener("input", function() {
 desiredTempF.addEventListener("input", function() {
   const fahrenheit = parseFloat(desiredTempF.value) || 0;
   const celsius = ((fahrenheit - 32) / 1.8).toFixed(1);
-  desiredTempCInput.value = celsius;
+  desiredTempC.value = celsius;
 });
 
 
@@ -85,7 +85,7 @@ if (currentTemp > desiredTempCValue && lastCommand !== "open") {
 buttons.forEach(button => button.style.display = "none");
 fetch("/pin17", { method: "POST" })
 .finally(() => {
-buttons.forEach(button => button.style.display = "block")
+buttons.forEach(button => button.style.display = "block"))
 
 lastCommand = "open";
 console.log("opened due to temperature");
@@ -94,7 +94,7 @@ console.log("opened due to temperature");
 buttons.forEach(button => button.style.display = "none");
 fetch("/pin27", { method: "POST" })
 .finally(() => {
-buttons.forEach(button => button.style.display = "block")
+buttons.forEach(button => button.style.display = "block"))
 
 lastCommand = "close";
 console.log("closed due to temperature");
