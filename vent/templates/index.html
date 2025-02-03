@@ -24,10 +24,11 @@ Automatic Temperature Control</label>
 
 <script>
 
+const buttons = document.querySelectorAll(".button");
+
 document.getElementById("open").addEventListener("click", function(event) {
 event.preventDefault();
 
-const buttons = document.querySelectorAll(".button");
 buttons.forEach(button => button.style.display = "none");
 
 fetch("/pin17", { method: "POST" })
@@ -40,11 +41,8 @@ buttons.forEach(button => button.style.display = "block");
 document.getElementById("close").addEventListener("click", function(event) {
 event.preventDefault();
 
-const buttons = document.querySelectorAll(".button");
 buttons.forEach(button => button.style.display = "none");
-
 fetch("/pin27", { method: "POST" })
-
 .finally(() => {
 buttons.forEach(button => button.style.display = "block");
 });
@@ -83,11 +81,21 @@ const desiredTempCValue = parseFloat(desiredTempC.value) || 0;
 
 if (tempCheckbox.checked) {
 if (currentTemp > desiredTempCValue && lastCommand !== "open") {
-fetch("/pin17", { method: "POST" });
+
+buttons.forEach(button => button.style.display = "none");
+fetch("/pin17", { method: "POST" })
+.finally(() => {
+buttons.forEach(button => button.style.display = "block")
+
 lastCommand = "open";
 console.log("opened due to temperature");
 } else if (currentTemp < desiredTempCValue && lastCommand !== "close") {
-fetch("/pin27", { method: "POST" });
+
+buttons.forEach(button => button.style.display = "none");
+fetch("/pin27", { method: "POST" })
+.finally(() => {
+buttons.forEach(button => button.style.display = "block")
+
 lastCommand = "close";
 console.log("closed due to temperature");
 }}});}
