@@ -82,11 +82,11 @@ document.getElementById("temperF").innerText = ((currentTemp * 1.8) + 32).toFixe
 const desiredTempCValue = parseFloat(desiredTempC.value) || 0;
 
 if (tempCheckbox.checked) {
-if (currentTemp < desiredTempCValue && lastCommand !== "open") {
+if (currentTemp > desiredTempCValue && lastCommand !== "open") {
 fetch("/pin17", { method: "POST" });
 lastCommand = "open";
 console.log("opened due to temperature");
-} else if (currentTemp > desiredTempCValue && lastCommand !== "close") {
+} else if (currentTemp < desiredTempCValue && lastCommand !== "close") {
 fetch("/pin27", { method: "POST" });
 lastCommand = "close";
 console.log("closed due to temperature");
