@@ -85,8 +85,8 @@ if (currentTemp > desiredTempCValue && lastCommand !== "open") {
 buttons.forEach(button => button.style.display = "none");
 fetch("/pin17", { method: "POST" })
 .finally(() => {
-buttons.forEach(button => button.style.display = "block"))
-
+buttons.forEach(button => button.style.display = "block");
+)}
 lastCommand = "open";
 console.log("opened due to temperature");
 } else if (currentTemp < desiredTempCValue && lastCommand !== "close") {
@@ -94,8 +94,8 @@ console.log("opened due to temperature");
 buttons.forEach(button => button.style.display = "none");
 fetch("/pin27", { method: "POST" })
 .finally(() => {
-buttons.forEach(button => button.style.display = "block"))
-
+buttons.forEach(button => button.style.display = "block");
+)}
 lastCommand = "close";
 console.log("closed due to temperature");
 }}});}
