@@ -14,36 +14,37 @@
 const buttons = document.querySelectorAll(".button");
 
 document.getElementById("open").addEventListener("click", function(event) {
-event.preventDefault();
+  event.preventDefault();
 
-buttons.forEach(button => button.style.display = "none");
+  buttons.forEach(button => button.style.display = "none");
 
-fetch("/pin17", { method: "POST" })
-
-.finally(() => {
-buttons.forEach(button => button.style.display = "block");
-});
+  fetch("/pin17", { method: "POST" })
+    .finally(() => {
+      buttons.forEach(button => button.style.display = "block");
+  });
 });
 
 document.getElementById("close").addEventListener("click", function(event) {
-event.preventDefault();
+  event.preventDefault();
 
-buttons.forEach(button => button.style.display = "none");
-fetch("/pin27", { method: "POST" })
-.finally(() => {
-buttons.forEach(button => button.style.display = "block");
-});
+  buttons.forEach(button => button.style.display = "none");
+  fetch("/pin27", { method: "POST" })
+    .finally(() => {
+      buttons.forEach(button => button.style.display = "block");
+  });
 });
 
 
 function updateTemper() {
-fetch("/temper")
-.then (response => response.json())
-.then (data => {
-const currentTemp = data.temper;
-document.getElementById("temperC").innerText = currentTemp.toFixed(2);
-document.getElementById("temperF").innerText = ((currentTemp * 1.8) + 32).toFixed(2);
-
+  console.log("updateTempter() now!");
+  fetch("/temper")
+    .then (response => response.json())
+    .then (data => {
+      const currentTemp = data.temper;
+      document.getElementById("temperC").innerText = currentTemp.toFixed(2);
+      document.getElementById("temperF").innerText = ((currentTemp * 1.8) + 32).toFixed(2);
+    });
+}
 
 setInterval(updateTemper, 1000);
 updateTemper();
