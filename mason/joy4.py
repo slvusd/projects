@@ -1,0 +1,31 @@
+#In working order as of 1/8/26
+from slvrov_tools.legacy_pca9685 import PCA9685_BASIC
+import time
+
+FREQ = 50  # Hz
+ADDR = 0x40
+BUS = 1
+pin = 0
+driver = PCA9685_BASIC(FREQ, ADDR, BUS)
+pins = []
+
+while True:
+    #pin, pwm = [int(i) for i in input("> ").strip().split()]
+    #print(pin)
+    #print(pwm)
+    #driver.write_duty_cycle(pin, 1000)
+    #time.sleep(2)
+    driver.write_duty_cycle(pin, 2000)
+    driver.write_duty_cycle(pin, 1500)
+    time.sleep(3)
+    try:
+        for i in range(500):
+         driver.write_duty_cycle(pin, (i+1500))
+    # does things that i dont understand (plug joystick input as I (range 1000-2000))
+    except:
+          print("good one")
+
+
+
+
+
