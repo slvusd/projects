@@ -4,7 +4,7 @@ import time
 # --- Setup ---
 kit = ServoKit(channels=16)
 kit.frequency = 50  # 50 Hz for ESC
-esc_channel = 0     # adjust if your ESC is on a different channel
+esc_channel = 1     # adjust if your ESC is on a different channel
 kit.servo[esc_channel].set_pulse_width_range(1000, 2000)
 
 # --- Helper function: send microseconds to ESC ---
