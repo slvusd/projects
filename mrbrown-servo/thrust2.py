@@ -4,7 +4,7 @@ import time
 kit = ServoKit(channels=16)
 kit.frequency = 50  # 50 Hz
 
-esc_channel = 0
+esc_channel = 1
 kit.servo[esc_channel].set_pulse_width_range(1000, 2000)
 
 def esc_write(channel, pulse_us):
