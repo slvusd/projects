@@ -3,7 +3,7 @@ import time
 
 kit = ServoKit(channels=16)
 kit.frequency = 50  # 50 Hz
-esc_channel = 15
+esc_channel = 0
 
 # Set pulse width range for the ESC
 kit.servo[esc_channel].set_pulse_width_range(1000, 2000)
@@ -26,7 +26,7 @@ def esc_write(channel, pulse_us):
 # Initialize ESC at neutral (1500 µs)
 esc_write(esc_channel, 1500)
 print("Initializing ESC at 1500 µs")
-time.sleep(2)
+time.sleep(3)
 
 # Full forward
 esc_write(esc_channel, 2000)
