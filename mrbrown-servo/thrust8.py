@@ -12,7 +12,7 @@ pca = PCA9685(i2c)
 # Set frequency to 50Hz
 pca.frequency = 50
 
-THRUSTER_CHANNEL = 14
+THRUSTER_CHANNEL = 0
 
 def us_to_duty(us):
     return int((us / 20000.0) * 4095)
