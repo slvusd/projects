@@ -26,15 +26,14 @@ while not calibrated:
             left_instance_id = event.instance_id
             for s in all_sticks:
                 if s.get_instance_id() == left_instance_id:
-                    left_stick = s
+                    js_left = s
                 else:
                     right_stick = s # Assign the other one as right
             print(f"Assigned Stick {left_instance_id} as LEFT.")
             calibrated = True
 
 print("Calibration Complete. Starting monitoring...\n")
-led_channel = pca.channels[0]
-led.channel.duty_cycle = 0xFFFF
+
 # 3. Main Loop
 clock = pygame.time.Clock()
 try:
