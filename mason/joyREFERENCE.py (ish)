@@ -1,0 +1,363 @@
+""" THIS IS A UNREFINED VERSION WITH A HUD I WANT TO HAVE REFERENCED WHEN PROGRESSING THROUGH HUD DEVELOPMENT"""
+import sys
+import time
+import threading
+import queue
+import numpy as np
+import pygame
+from collections import deque
+from dataclasses import dataclass, field
+from typing import List
+from PyQt6.QtWidgets import QApplication, QWidget
+from PyQt6.QtCore import Qt, QTimer, QPoint, QRectF
+from PyQt6.QtGui import QPainter, QColor, QFont, QPen, QBrush
+
+# --- 1. PRO ARCHITECTURE: SHARED STATE ---
+# We use a thread-safe Singleton-like pattern to share data between Hardware and UI.
+
+@dataclass
+class ROVState:
+    """Thread-safe data container for all telemetry."""
+    # Inputs
+    controls: List[float] = field(default_factory=lambda: [0.0, 0.0, 0.0, 0.0, 0.0]) # Fwd, Str, Yaw, Heave, Roll
+    claw: dict = field(default_factory=lambda: {"x": 0, "y": 0, "trigger": 0})
+    
+    # Outputs
+    thrusters: List[float] = field(default_factory=lambda: [0.0] * 6)
+    
+    # System
+    fps: float = 0.0
+    status: str = "STANDBY"
+    
+    # Console Log
+    logs: deque = field(default_factory=lambda: deque(maxlen=8))
+    _lock: threading.Lock = field(default_factory=threading.Lock)
+
+    def update_telemetry(self, controls, thrusters, claw):
+        with self._lock:
+            self.controls = controls
+            self.thrusters = thrusters
+            self.claw = claw
+
+    def log(self, message: str):
+        with self._lock:
+            timestamp = time.strftime("%H:%M:%S")
+            self.logs.append(f"[{timestamp}] {message}")
+            print(f"LOG: {message}") # Optional: keep printing to terminal for debugging
+
+    def get_snapshot(self):
+        """Returns a copy of the data for the UI to render."""
+        with self._lock:
+            return {
+                "c": list(self.controls),
+                "t": list(self.thrusters),
+                "cl": self.claw.copy(),
+                "logs": list(self.logs),
+                "fps": self.fps,
+                "status": self.status
+            }
+
+# Initialize Global State
+STATE = ROVState()
+
+
+# --- 2. HARDWARE LOGIC (ROV CONTROLLER) ---
+
+class ROVHardware:
+    def __init__(self):
+        pygame.init()
+        pygame.joystick.init()
+        self.connect_joysticks()
+        
+        # Mixing Matrix (6 Thrusters x 5 DOF)
+        self.mixing_matrix = np.array([
+            [1.0,  1.0, -1.0,  0.0,  0.0], # FL
+            [1.0, -1.0,  1.0,  0.0,  0.0], # FR
+            [1.0, -1.0, -1.0,  0.0,  0.0], # RL
+            [1.0,  1.0,  1.0,  0.0,  0.0], # RR
+            [0.0,  0.0,  0.0, -1.0,  1.0], # Vert 1
+            [0.0,  0.0,  0.0, -1.0, -1.0]  # Vert 2
+        ])
+        
+    def connect_joysticks(self):
+        self.count = pygame.joystick.get_count()
+        self.js_main = None
+        self.js_aux = None
+        
+        if self.count > 0:
+            self.js_main = pygame.joystick.Joystick(0)
+            self.js_main.init()
+            STATE.log(f"Connected Main: {self.js_main.get_name()}")
+            
+        if self.count > 1:
+            self.js_aux = pygame.joystick.Joystick(1)
+            self.js_aux.init()
+            STATE.log(f"Connected Aux: {self.js_aux.get_name()}")
+        elif self.count == 0:
+            STATE.log("CRITICAL: No Joysticks Found!")
+
+    def deadzone(self, val, limit=0.1):
+        if abs(val) < limit: return 0.0
+        return np.sign(val) * (abs(val) - limit) / (1.0 - limit)
+
+    def process_inputs(self):
+        pygame.event.pump()
+        
+        # [Forward, Strafe, Yaw, Heave, Roll]
+        inputs = np.array([0.0, 0.0, 0.0, 0.0, 0.0])
+        
+        # Claw Data
+        claw_data = {"x": 0, "y": 0, "trigger": 0}
+
+        if self.js_main:
+            # Main Stick: Movement
+            inputs[1] = self.deadzone(self.js_main.get_axis(0))  # Strafe
+            inputs[0] = self.deadzone(-self.js_main.get_axis(1)) # Forward
+            inputs[2] = self.deadzone(self.js_main.get_axis(2))  # Yaw
+            inputs[3] = self.deadzone(-self.js_main.get_axis(3)) # Heave (Slider/Axis 3)
+            
+            # Simple Claw mapping (using buttons 0/1)
+            claw_data["trigger"] = self.js_main.get_button(0)
+
+        if self.js_aux:
+            # Aux Stick: Camera/Claw precise control
+            inputs[4] = self.deadzone(self.js_aux.get_axis(0))   # Roll
+            claw_data["x"] = self.js_aux.get_hat(0)[0]
+            claw_data["y"] = self.js_aux.get_hat(0)[1]
+
+        # Calculate Physics
+        thruster_out = self.mixing_matrix @ inputs
+        
+        # Normalize
+        max_t = np.max(np.abs(thruster_out))
+        if max_t > 1.0:
+            thruster_out /= max_t
+
+        return inputs, thruster_out, claw_data
+
+
+# --- 3. PRO UI: THE HUD WIDGET ---
+
+class ProHUD(QWidget):
+    def __init__(self):
+        super().__init__()
+        
+        # Window Config
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setGeometry(100, 100, 600, 350)
+        
+        # State
+        self.old_pos = None
+        self.data = STATE.get_snapshot()
+        
+        # Update Loop (60 FPS for smooth gauges)
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.tick)
+        self.timer.start(16)
+        
+        # Performance monitoring
+        self.last_time = time.time()
+        self.frame_count = 0
+
+    def tick(self):
+        # Calculate FPS
+        self.frame_count += 1
+        now = time.time()
+        if now - self.last_time >= 1.0:
+            STATE.fps = self.frame_count
+            self.frame_count = 0
+            self.last_time = now
+            
+        self.data = STATE.get_snapshot()
+        self.update() # Trigger repaint
+
+    # --- Mouse Drag Logic ---
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.old_pos = event.globalPosition().toPoint()
+
+    def mouseMoveEvent(self, event):
+        if self.old_pos:
+            delta = event.globalPosition().toPoint() - self.old_pos
+            self.move(self.pos() + delta)
+            self.old_pos = event.globalPosition().toPoint()
+
+    def mouseReleaseEvent(self, event):
+        self.old_pos = None
+
+    # --- RENDER ENGINE ---
+    def paintEvent(self, event):
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        
+        # 1. Background Panel (Glass Effect)
+        w, h = self.width(), self.height()
+        bg_color = QColor(10, 20, 30, 210) # Dark Sci-Fi Blue
+        border_color = QColor(0, 255, 255, 150) # Cyan Glow
+        
+        p.setBrush(bg_color)
+        p.setPen(QPen(border_color, 2))
+        p.drawRoundedRect(0, 0, w, h, 10, 10)
+        
+        # 2. Header
+        p.setPen(QColor(255, 255, 255))
+        p.setFont(QFont("Eurostile", 14, QFont.Weight.Bold))
+        p.drawText(20, 30, f"GODZILLAH SPECS // {time.strftime('%H:%M:%S')}")
+        
+        p.setFont(QFont("Consolas", 10))
+        p.setPen(QColor(0, 255, 0) if self.data['fps'] > 30 else QColor(255, 255, 255))
+        p.drawText(w - 80, 30, f"FPS: {self.data['fps']}")
+
+        # 3. Input Visualizer (Radar Scope)
+        self.draw_stick_visualizer(p, 60, 100, 50, self.data['c'])
+        
+        # 4. Thruster Gauges
+        self.draw_thruster_bars(p, 160, 80)
+        
+        # 5. On-Screen Console
+        self.draw_console(p, 20, 220, w - 40, 110)
+
+    def draw_stick_visualizer(self, p, cx, cy, r, controls):
+        # Draw Scope
+        p.setPen(QPen(QColor(0, 255, 255, 50), 2))
+        p.setBrush(Qt.BrushStyle.NoBrush)
+        p.drawEllipse(QPoint(cx, cy), r, r)
+        p.drawLine(cx - r, cy, cx + r, cy) # Crosshair H
+        p.drawLine(cx, cy - r, cx, cy + r) # Crosshair V
+        
+        # Draw Stick Position
+        # controls[0]=Fwd, controls[1]=Strafe
+        dx = int(controls[1] * r)
+        dy = int(-controls[0] * r) # Invert Y for screen coords
+        
+        p.setBrush(QColor(255, 50, 50))
+        p.setPen(Qt.PenStyle.NoPen)
+        p.drawEllipse(QPoint(cx + dx, cy + dy), 6, 6)
+        
+        # Label
+        p.setPen(QColor(255, 255, 255))
+        p.drawText(cx - 20, cy + r + 20, "INPUT")
+
+    def draw_stick_visualizer2(self, p, cx, cy, r, controls):
+        # Draw Scope
+        p.setPen(QPen(QColor(0, 255, 255, 50), 2))
+        p.setBrush(Qt.BrushStyle.NoBrush)
+        p.drawEllipse(QPoint(cx, cy), r, r)
+        p.drawLine(cx - r, cy, cx + r, cy) # Crosshair H
+        p.drawLine(cx, cy - r, cx, cy + r) # Crosshair V
+        
+        # Draw Stick Position
+        # controls[0]=Fwd, controls[1]=Strafe
+        dx = int(controls[1] * r)
+        dy = int(-controls[0] * r) # Invert Y for screen coords
+        
+        p.setBrush(QColor(255, 50, 50))
+        p.setPen(Qt.PenStyle.NoPen)
+        p.drawEllipse(QPoint(cx + dx, cy + dy), 6, 6)
+        
+        # Label
+        p.setPen(QColor(255, 255, 255))
+        p.drawText(cx - 20, cy + r + 20, "INPUT")
+
+    def draw_thruster_bars(self, p, x_start, y_start):
+        bar_w = 30
+        bar_h = 100
+        gap = 40
+        
+        vals = self.data['t']
+        
+        for i, val in enumerate(vals):
+            x = x_start + (i * gap)
+            center_y = y_start + (bar_h / 2)
+            
+            # Draw Slot
+            p.setPen(QColor(0, 255, 255, 50))
+            p.setBrush(QColor(0, 0, 0, 100))
+            p.drawRect(x, y_start, bar_w, bar_h)
+            
+            # Draw Center Line
+            p.setPen(QColor(255, 255, 255, 100))
+            p.drawLine(x, int(center_y), x + bar_w, int(center_y))
+            
+            # Draw Fill
+            fill_h = int((val) * (bar_h / 2)) # -1.0 to 1.0 mapped to height
+            
+            if abs(fill_h) > 1:
+                if fill_h > 0: # Forward (Cyan)
+                    p.setBrush(QColor(0, 255, 255))
+                    # Draw from center UP
+                    p.drawRect(x + 5, int(center_y - fill_h), bar_w - 10, fill_h)
+                else: # Reverse (Orange)
+                    p.setBrush(QColor(255, 100, 0))
+                    # Draw from center DOWN
+                    p.drawRect(x + 5, int(center_y), bar_w - 10, abs(fill_h))
+            
+            # Label
+            p.setPen(QColor(200, 200, 200))
+            p.drawText(x + 8, y_start + bar_h + 15, f"T{i+1}")
+
+    def draw_console(self, p, x, y, w, h):
+        # Console Box
+        p.setBrush(QColor(0, 0, 0, 150))
+        p.setPen(QPen(QColor(0, 255, 255, 50), 1))
+        p.drawRect(x, y, w, h)
+        
+        # Text
+        p.setFont(QFont("Consolas", 9))
+        p.setPen(QColor(0, 255, 150))
+        
+        logs = self.data['logs']
+        line_h = 14
+        
+        for i, line in enumerate(reversed(logs)):
+            # Draw from bottom up
+            y_pos = (y + h) - 5 - (i * line_h)
+            if y_pos < y + 10: break # Don't draw outside box
+            p.drawText(x + 5, int(y_pos), line)
+
+
+# --- 4. MAIN THREAD RUNNER ---
+
+def logic_thread(stop_event, pwm_queue):
+    """Background thread for Joystick & Math"""
+    try:
+        hardware = ROVHardware()
+        STATE.log("Hardware Initialized.")
+        
+        while not stop_event.is_set():
+            # 1. Read & Calc
+            inputs, thrusters, claw = hardware.process_inputs()
+            
+            # 2. Update Global State (Thread Safe)
+            STATE.update_telemetry(inputs, thrusters, claw)
+            
+            # 3. Simulate Hardware Send
+            # Convert -1.0..1.0 to PWM 1100..1900
+            pwm = [int(1500 + (t * 400)) for t in thrusters]
+            if not pwm_queue.full():
+                pwm_queue.put(pwm)
+                
+            time.sleep(0.02) # 50Hz Loop
+            
+    except Exception as e:
+        STATE.log(f"Error: {e}")
+
+if __name__ == "__main__":
+    # Setup Logic
+    stop_event = threading.Event()
+    pwm_queue = queue.Queue(maxsize=10)
+    
+    # Start Logic Thread
+    t = threading.Thread(target=logic_thread, args=(stop_event, pwm_queue), daemon=True)
+    t.start()
+    
+    # Start GUI
+    app = QApplication(sys.argv)
+    hud = ProHUD()
+    hud.show()
+    
+    try:
+        sys.exit(app.exec())
+    except KeyboardInterrupt:
+        stop_event.set()
