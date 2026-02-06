@@ -1,0 +1,178 @@
+import pygame
+import time
+import numpy as np
+import threading
+import queue
+import sys
+import math
+from collections import deque
+from kivy.app import App
+from kivy.uix.widget import Widget
+from kivy.clock import Clock
+from kivy.core.window import Window
+from kivy.graphics import Color, Line, InstructionGroup
+from kivy.config import Config
+from pynput import keyboard
+
+# --- KIVY CONFIG (Must be before other Kivy imports) ---
+Config.set('graphics', 'resizable', '0')
+Config.set('graphics', 'borderless', '1')
+Config.set('graphics', 'transparent', '1')
+Config.set('graphics', 'always_on_top', '1')
+
+# --- GLOBAL TELEMETRY ---
+hud_telemetry = {
+    "controls": [0.0, 0.0, 0.0, 0.0, 0.0],
+    "thrusters": [0.0] * 6,
+    "claw": {"x": 0, "y": 0, "trigger": 0}
+}
+
+log_lines = deque(maxlen=6)
+log_lock = threading.Lock()
+
+def log(msg: str):
+    with log_lock:
+        for line in str(msg).splitlines():
+            log_lines.append(line)
+
+# --- PYGAME & HARDWARE ---
+pygame.init()
+pygame.joystick.init()
+LEFT_INDEX = None
+RIGHT_INDEX = None
+calibrated = False 
+
+joystick_count = pygame.joystick.get_count()
+
+if joystick_count >= 2:
+    for i in range(joystick_count):
+        try: pygame.joystick.Joystick(i)
+        except: pass
+
+    def do_calibration():
+        global LEFT_INDEX, RIGHT_INDEX, calibrated
+        if not calibrated:
+            for ev in pygame.event.get():
+                if ev.type == pygame.JOYBUTTONDOWN:
+                    jid = getattr(ev, 'instance_id', getattr(ev, 'joy', None))
+                    if jid is None: continue
+                    LEFT_INDEX = int(jid)
+                    for i in range(joystick_count):
+                        if i != LEFT_INDEX:
+                            RIGHT_INDEX = i
+                            break
+                    calibrated = True
+
+class ROVController:
+    def __init__(self):
+        self.js_right = self.js_left = None
+        r_idx = RIGHT_INDEX if RIGHT_INDEX is not None else 0
+        l_idx = LEFT_INDEX if LEFT_INDEX is not None else (1 if r_idx == 0 else 0)
+        try:
+            if pygame.joystick.get_count() >= 1:
+                self.js_right = pygame.joystick.Joystick(r_idx)
+            if pygame.joystick.get_count() >= 2:
+                self.js_left = pygame.joystick.Joystick(l_idx)
+        except: pass
+        
+        self.mixing_matrix = np.array([
+            [1, 1.0, -1, 0.0, 0.0], [1.0, -1.0, 1, 0.0, 0.0],
+            [1, -1.0, -1, 0.0, 0.0], [1, -1.0, 1, 0.0, 0.0],
+            [0.0, 0.0, 0.0, -1.0, 1.0], [0.0, 0.0, 0.0, -1.0, -1.0]
+        ])
+        self.deadzone = 0.1
+        
+    def apply_deadzone(self, value):
+        if abs(value) < self.deadzone: return 0.0
+        return (value - (self.deadzone if value > 0 else -self.deadzone)) / (1.0 - self.deadzone)
+    
+    def read_joysticks(self):
+        pygame.event.pump()
+        controls = np.zeros(5) 
+        if self.js_right:
+            controls[1] = self.apply_deadzone(self.js_right.get_axis(0)) # Strafe
+            controls[0] = self.apply_deadzone(-self.js_right.get_axis(1)) # Forward
+            controls[2] = self.apply_deadzone(self.js_right.get_axis(2)) # Yaw
+        if self.js_left:
+            controls[3] = self.apply_deadzone(-self.js_left.get_axis(1)) # Heave
+            controls[4] = self.apply_deadzone(self.js_left.get_axis(0))  # Roll
+        return controls
+
+class ClawController:
+    def __init__(self, index):
+        self.joystick = None
+        if index is not None and index < pygame.joystick.get_count():
+            self.joystick = pygame.joystick.Joystick(index)
+
+    def read(self):
+        if not self.joystick: return 0, 0, 0
+        pygame.event.pump()
+        x, y = self.joystick.get_hat(0) if self.joystick.get_numhats() > 0 else (0, 0)
+        trigger = self.joystick.get_button(0)
+        return x, y, trigger
+
+class MovableGhostHUD(Widget):
+    Color_Theme = (1.0, 0.19, 0.78, 1.0) # Mason's Pink (RGBA normalized)
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.is_ghost = True 
+        self.rov_ctrl = None
+        
+        # Cube Data: 8 vertices of a cube (x, y, z)
+        self.points = [
+            [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1],
+            [-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1]
+        ]
+        # Connections between vertices to draw the edges
+        self.edges = [
+            (0,1), (1,2), (2,3), (3,0), # Front face
+            (4,5), (5,6), (6,7), (7,4), # Back face
+            (0,4), (1,5), (2,6), (3,7)  # Connecting lines
+        ]
+
+        # Use Clock instead of QTimer to keep hardware on Main Thread
+        Clock.schedule_interval(self.tick, 1/60.0)
+
+        self.kb_listener = keyboard.Listener(on_press=self.on_press)
+        self.kb_listener.start()
+
+    def on_press(self, key):
+        if key == keyboard.Key.f2:
+            self.is_ghost = not self.is_ghost
+            # In Kivy, transparency/input is handled by the Config at startup
+
+    def tick(self, dt):
+        # Handle calibration and hardware
+        do_calibration()
+        if calibrated and self.rov_ctrl is None:
+            self.rov_ctrl = ROVController()
+        
+        if self.rov_ctrl:
+            hud_telemetry["controls"] = self.rov_ctrl.read_joysticks()
+            
+        self.canvas.clear()
+        self.draw_3d_rov()
+
+    def draw_3d_rov(self):
+        """Projects a 3D wireframe cube onto the Kivy canvas."""
+        with self.canvas:
+            Color(*self.Color_Theme)
+            cx, cy = Window.width / 2, Window.height / 2
+            size = 100
+            
+            # Simple projected representation for verification
+            # (Insert your full rotation matrix math here)
+            for edge in self.edges:
+                p1 = self.points[edge[0]]
+                p2 = self.points[edge[1]]
+                Line(points=[cx + p1[0]*size, cy + p1[1]*size, 
+                             cx + p2[0]*size, cy + p2[1]*size], width=1.5)
+
+class Joy11App(App):
+    def build(self):
+        Window.clearcolor = (0, 0, 0, 0) # Set window background to transparent
+        return MovableGhostHUD()
+
+if __name__ == "__main__":
+    Joy11App().run()
