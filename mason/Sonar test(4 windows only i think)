@@ -1,0 +1,73 @@
+""" this is a test file for the sonar.py file, which is a file that will be used to test the sonar.py file. 
+this test will be config'd around a blue yeti mic and a sceptre y32 monitor mount and my home pc
+ 2/5/2026
+ """
+
+import pyaudio
+import numpy as np
+import scipy.signal as signal
+import struct
+import time
+import os
+
+# --- STABLE SETTINGS ---
+FS = 48000  
+CHIRP_DUR = 0.15
+SPEED_SOUND_AIR = 343.0 
+
+class StereoSonarFix:
+    def __init__(self, in_idx, out_idx):
+        self.pa = pyaudio.PyAudio()
+        self.in_idx = in_idx
+        self.out_idx = out_idx
+        
+        # Generate Chirp
+        t = np.linspace(0, CHIRP_DUR, int(FS * CHIRP_DUR))
+        self.chirp = signal.chirp(t, f0=1000, f1=6000, t1=CHIRP_DUR).astype(np.float32) * 0.7
+        
+        # Create a STEREO version of the chirp (left and right channels same)
+        # Windows HDMI/NVIDIA drivers almost always require 2 channels.
+        self.chirp_stereo = np.vstack((self.chirp, self.chirp)).T.flatten()
+        
+        self.master_cloud = []
+
+    def get_ping(self):
+        stream = None
+        try:
+            # We open the output with 2 CHANNELS (Stereo)
+            stream = self.pa.open(format=pyaudio.paFloat32, 
+                                 channels=2, # Changed to 2 for Sceptre/NVIDIA
+                                 rate=FS,
+                                 input=True, 
+                                 output=True, 
+                                 input_device_index=self.in_idx,
+                                 output_device_index=self.out_idx,
+                                 input_channels=1, # Yeti is mono
+                                 frames_per_buffer=2048)
+            
+            # Play Stereo Chirp and Record
+            stream.write(self.chirp_stereo.tobytes())
+            raw_rec = stream.read(int(FS * 0.5), exception_on_overflow=False)
+            recording = np.frombuffer(raw_rec, dtype=np.float32)
+
+            # Analyze (using the mono version of the chirp for the math)
+            corr = signal.correlate(recording, self.chirp, mode='valid')
+            peak_sample = np.argmax(np.abs(corr))
+            dist = (peak_sample / FS) * SPEED_SOUND_AIR / 2.0
+            return max(0, dist - 0.22) 
+            
+        except Exception as e:
+            print(f"Stream Error: {e}")
+            return None
+        finally:
+            if stream:
+                stream.stop_stream()
+                stream.close()
+
+# --- EXECUTION ---
+MY_MIC = 24
+MY_SPEAKER = 22
+
+sonar = StereoSonarFix(MY_MIC, MY_SPEAKER)
+print("Starting Stereo Sonar Test...")
+sonar.run_scan() # Uses the same scan loop as before
