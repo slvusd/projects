@@ -1,0 +1,108 @@
+"""The Da Vinci of our time (Mason Scott Gershenson) :) is making a 
+ to use sonar pings to make a 3d stl model of the pool/ocean floor in a radius of about 3-50 meters (based in a how much i set it to)
+ This is the code for the Delaunay triangulation, which is a mathematical tool used to approximate functions.
+ 2/5/2026"""
+import numpy as np
+import struct
+import time
+from scipy.interpolate import LinearNDInterpolator
+
+class IntegratedROVMapper:
+    def __init__(self, voxel_size=0.05):
+        self.voxel_size = voxel_size
+        self.master_cloud = np.empty((0, 3))
+        # Initial ROV State (From Joysticks)
+        self.rov_pos = np.array([0.0, 0.0, 0.0])
+        self.rov_ori = [0.0, 0.0, 0.0] # Pitch, Yaw, Roll
+
+    def get_rotation_matrix(self, p, y, r):
+        """Feature from 'before': The math that rotates the ROV model."""
+        # Standard 3D Rotation Matrix logic
+        Rx = np.array([[1,0,0], [0, np.cos(p), -np.sin(p)], [0, np.sin(p), np.cos(p)]])
+        Ry = np.array([[np.cos(y), 0, np.sin(y)], [0,1,0], [-np.sin(y), 0, np.cos(y)]])
+        Rz = np.array([[np.cos(r), -np.sin(r), 0], [np.sin(r), np.cos(r), 0], [0,0,1]])
+        return Ry @ Rx @ Rz
+
+    def update_from_sticks(self, controls):
+        """Moves the ROV in the 'Global' world based on joystick input."""
+        # Mapping: stick inputs translate the ROV position
+        fwd, strafe, yaw, heave, roll = controls
+        self.rov_pos[0] += fwd * 0.1
+        self.rov_pos[1] += strafe * 0.1
+        self.rov_pos[2] += heave * 0.1
+        self.rov_ori = [p * 0.5 for p in [fwd, yaw, roll]] # Visual tilt
+
+    def add_sonar_data(self, side_points):
+        """
+        Takes 400 points from a side, rotates them based on 
+        the ROV's current tilt, and pins them to the map.
+        """
+        R = self.get_rotation_matrix(*self.rov_ori)
+        # Transform local pings into Global coordinates
+        global_pings = (side_points @ R.T) + self.rov_pos
+        
+        # PERSISTENCE: Merge into master cloud
+        self.master_cloud = np.vstack((self.master_cloud, global_pings))
+        
+        # VOXEL FILTER: Keeping it fast for Pi 5
+        if len(self.master_cloud) > 2000:
+            self.master_cloud = np.unique(np.round(self.master_cloud / self.voxel_size), axis=0) * self.voxel_size
+
+    def export_stl(self, filename="mission.stl"):
+        """The 'Space Filling' STL feature."""
+        if len(self.master_cloud) < 20: return
+        
+        x, y, z = self.master_cloud.T
+        interp = LinearNDInterpolator(np.vstack((x, y)).T, z)
+        
+        # Build 30x30 grid for the STL surface
+        res = 30
+        xi = np.linspace(x.min(), x.max(), res)
+        yi = np.linspace(y.min(), y.max(), res)
+        X, Y = np.meshgrid(xi, yi)
+        Z = np.nan_to_num(interp(X, Y), nan=np.min(z))
+
+        # Binary STL generation
+        facets = []
+        for i in range(res - 1):
+            for j in range(res - 1):
+                v1, v2 = [X[i,j], Y[i,j], Z[i,j]], [X[i+1,j], Y[i+1,j], Z[i+1,j]]
+                v3, v4 = [X[i,j+1], Y[i,j+1], Z[i,j+1]], [X[i+1,j+1], Y[i+1,j+1], Z[i+1,j+1]]
+                facets.append((v1, v2, v3)); facets.append((v2, v4, v3))
+        
+        self._write_binary_stl(facets, filename)
+
+    def _write_binary_stl(self, facets, filename):
+        with open(filename, 'wb') as f:
+            f.write(b'\x00' * 80)
+            f.write(struct.pack('<I', len(facets)))
+            for tri in facets:
+                f.write(struct.pack('<fff3f3f3fH', 0,0,0, *tri[0], *tri[1], *tri[2], 0))
+
+# --- MAIN MISSION LOOP ---
+mapper = IntegratedROVMapper()
+
+print("Mission Started. Move joysticks to map environment...")
+try:
+    for _ in range(50):
+        # 1. Simulate Joystick Inputs [F, S, Y, H, R]
+        mock_sticks = [0.1, 0.0, 0.05, -0.02, 0.0] 
+        mapper.update_from_sticks(mock_sticks)
+
+        # 2. Simulate 400 Sonar points from the bottom (Floor)
+        # These points move relative to the ROV
+        local_sonar = np.random.uniform(-1, 1, (400, 3))
+        local_sonar[:, 2] = -2.0 # Floor is 2m below
+        
+        # 3. Add to Persistent Map
+        mapper.add_sonar_data(local_sonar)
+        
+        print(f"Current Pos: {mapper.rov_pos} | Points: {len(mapper.master_cloud)}")
+        time.sleep(0.1) # 10Hz target
+
+    # 4. Save final result
+    mapper.export_stl("mission_complete.stl")
+    print("STL Exported Successfully!")
+
+except KeyboardInterrupt:
+    pass
