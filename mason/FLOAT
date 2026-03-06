@@ -1,0 +1,24 @@
+import math
+import time
+import smbus2
+import machine
+
+ip = "idk yet"
+i2c = I2C(0, scl=Pin(0), sda=Pin(1))
+class float:
+    def __init__(self, ip, distance):
+        while True:
+            time += 1
+            time.sleep(1)
+            if time >= 130:
+                break
+        self.ip = ip
+        self.distance = distance
+        return time, distance, ip
+    def velocity_calc(self, distance, time):
+        float_velocity = 9.11 * (math.sin((math.pi/40) * time))
+        return float_velocity
+    def pull_info(self, ip):
+
+    def run(self,float_velocity, ip, distance):
+        self.__init__
