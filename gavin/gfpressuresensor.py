@@ -1,5 +1,5 @@
 import ms5837
-import time
+# import time
 
 """
 sensor = ms5837.MS5837_02ba()
