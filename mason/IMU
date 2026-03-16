@@ -1,0 +1,58 @@
+import adafruit_bno055
+import time
+import slvrov_tools
+import numpy as np
+from dataclasses import dataclass
+import busio
+import board
+import math
+import logging
+
+logging.basicConfig(filename='error_log.txt', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+pwm_array = np.array([
+    #FORWARD, STRAFE, ROTATE, VERTICAL_UP, VERTICAL_DOWN
+    [1, 1.0, -1, 0.0, 0.0], # Motor 1 (45 degrees forward-right)
+    [1.0, -1.0, 1, 0.0, 0.0],# Motor 2 (45 degrees forward-left)
+    [1, -1.0, -1, 0.0, 0.0],# Motor 3 (45 degrees backward-left)
+    [1, -1.0, 1, 0.0, 0.0],# Motor 4 (45 degrees backward-right)
+    [0.0, 0.0, 0.0, -1.0, 1.0],# Motor 5 (vertical)
+    [0.0, 0.0, 0.0, -1.0, -1.0]  # Motor 6 (vertical)
+
+])
+
+class IMU:
+    def __init__(self, i2c):
+        self.sensor = adafruit_bno055.BNO055_I2C(i2c)
+        self.calibrated = False
+        self.calibration_data = None
+
+    def read_imu(self):
+        def check_calibration():
+            calib = self.sensor.calibration_status
+            if calib == (3, 3, 3, 3):
+                self.calibrated = True
+                self.calibration_data = self.sensor.calibration_data
+                logging.info("IMU Calibrated!")
+            else:
+                logging.error(f"Calibration Status: {calib}")
+        def read_data():
+            try:
+                orientation = self.sensor.euler
+                accel = self.sensor.acceleration
+                gyro = self.sensor.gyro
+                readings = np.array ([orientation[0] or 0, orientation[1] or 0, orientation[2] or 0],
+                                    [accel[0] or 0, accel[1] or 0, accel[2] or 0],
+                                    [gyro[0] or 0, gyro[1] or 0, gyro[2] or 0])
+
+                return readings
+            except Exception as exception: # ;)
+                logging.error(f"Error reading IMU data: {exception}")
+                return None, None, None
+            
+
+def control_imu():
+    # Use a matrix to transform IMU data into ROV control signals (e.g., for stabilization, 6 motors 4 at 45 degree angles, 2 vertical)
+    pass
+def main():
+    pass
